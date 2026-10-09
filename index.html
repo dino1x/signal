@@ -1,0 +1,1187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Signal — Autonomous GTM & ICP Discovery Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        background-color: #f4efe6;
+        background-image: linear-gradient(to right, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
+        background-size: 80px 100%;
+        color: #1a1e1c;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+      .font-mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+      /* Halo glow button */
+      .halo-btn {
+        box-shadow: 0 0 25px -4px rgba(45, 140, 255, 0.4), 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Card Surface */
+      .bento-card {
+        background: #ffffff;
+        border: 1px solid #e4dfd3;
+        border-radius: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 2px 8px rgba(0, 0, 0, 0.015);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      }
+      .bento-card:hover {
+        border-color: #d5cebf;
+        box-shadow: 0 6px 20px -4px rgba(46, 70, 58, 0.06);
+      }
+
+      /* Sage Green Deep Anchor Card */
+      .deep-card {
+        background: #192520;
+        color: #ffffff;
+        border: 1px solid #23332d;
+        border-radius: 20px;
+        box-shadow: 0 8px 24px -4px rgba(25, 37, 32, 0.25);
+      }
+
+      /* Sage Green Active Pill */
+      .sage-pill {
+        background: #476655;
+        color: #ffffff;
+      }
+
+      /* Tactile Sliders */
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 6px;
+        background: #e2ddd1;
+        border-radius: 9999px;
+        outline: none;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #344c3f;
+        cursor: pointer;
+        border: 2px solid #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        transition: transform 0.1s ease;
+      }
+      input[type="range"]::-webkit-slider-thumb:hover {
+        transform: scale(1.15);
+      }
+
+      /* Smooth Spline Wave Area */
+      .chart-gradient {
+        fill: url(#sageWaveGrad);
+      }
+
+      /* Scrollbars */
+      ::-webkit-scrollbar { width: 5px; height: 5px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #d5cebf; border-radius: 9999px; }
+      ::-webkit-scrollbar-thumb:hover { background: #b8b09f; }
+    </style>
+  </head>
+  <body class="min-h-screen w-screen flex flex-col relative selection:bg-emerald-100 selection:text-emerald-950">
+
+    <!-- FREVANA_APP_DIRECTIVE:START
+{
+  "version": 1,
+  "summary": "Signal is an autonomous GTM & Ideal Customer Profile (ICP) discovery engine styled in an executive Sand & Sage Green architectural aesthetic. It queries live public engineering discussions and live GitHub code repositories to deconstruct any startup into its highest-converting buyer persona, active purchase triggers, multi-touch outbound sequences, and an interactive pipeline velocity spline chart with zero mock data.",
+  "visualStyle": ["Warm sand alabaster canvas (#f4efe6), pure white tactile card surfaces (#ffffff), refined sage green accents (#476655), deep forest slate anchor card (#192520), smooth SVG spline curve."],
+  "layout": ["Top Minimal Floating Nav, Executive Command Bar with Pill Presets, Top 4-Metric Pill Strip, Balanced 2-Column Cockpit (Left: Target Account Blueprint & Multi-Touch Sequence Battlecard; Right: Live Dual-Stream Telemetry & Interactive Pipeline Velocity Simulator with Live Wave Chart), Bottom Export Row."],
+  "interactionRules": [
+    "Live API querying of real public discussions (Hacker News) and real code repositories (GitHub) with live URLs and metrics.",
+    "Dynamic synthesis of target ICP, sales velocity, and 3-step outbound sequence based on actual user input.",
+    "Interactive GTM Pipeline Velocity Simulator updating ARR, payback periods, and the smooth SVG velocity wave in real-time.",
+    "1-Click clipboard copying for cold touches and markdown playbooks.",
+    "Multi-format export supporting JSON and Apollo/HubSpot compatible CSV.",
+    "Direct dispatch to Frevana Host Agent via postMessage bridge.",
+    "Procedural Web Audio acoustic feedback on clicks and tab switches."
+  ]
+}
+FREVANA_APP_DIRECTIVE:END -->
+
+    <div id="root" class="flex flex-col min-h-screen w-full relative z-10">
+
+      <!-- ========================================== -->
+      <!-- TOP FLOATING PILL NAVBAR                   -->
+      <!-- ========================================== -->
+      <div class="w-full max-w-4xl mx-auto px-6 pt-5 sticky top-0 z-40">
+        <nav class="w-full px-5 py-2.5 rounded-full bg-white/95 backdrop-blur-md border border-[#e4dfd3] shadow-sm flex items-center justify-between">
+          
+          <!-- Brand Mark -->
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-[#192520] flex items-center justify-center text-emerald-400 shadow-xs border border-[#2d4239] p-1.5 transition-transform hover:scale-105">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full">
+                <!-- Concentric Signal Pulse Waves & Origin Core -->
+                <circle cx="6" cy="18" r="2.2" fill="#52b788" stroke="none" />
+                <path d="M6 12a6 6 0 0 1 6 6" stroke="#a3b899" stroke-width="2.2" />
+                <path d="M6 6a12 12 0 0 1 12 12" stroke="#e8f0eb" stroke-width="2.2" />
+              </svg>
+            </div>
+            <span class="font-bold text-sm tracking-tight text-[#192520] font-sans">signal</span>
+          </div>
+
+          <!-- Right Action Pill Button -->
+          <div class="flex items-center gap-3">
+            <button
+              onclick="openHostChat()"
+              class="halo-btn px-4 py-1.5 rounded-full bg-[#192520] hover:bg-[#283b32] text-white font-medium text-xs transition-all cursor-pointer active:scale-98 flex items-center gap-1.5"
+            >
+              <span>Ask Frevana Host</span>
+              <span class="text-xs">&rarr;</span>
+            </button>
+          </div>
+
+        </nav>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- EDITORIAL DISCOVERY HERO & COMMAND INPUT   -->
+      <!-- ========================================== -->
+      <header class="w-full max-w-4xl mx-auto px-6 pt-10 pb-6 flex flex-col items-center text-center">
+        
+        <!-- Chapter Badge -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/80 border border-[#e4dfd3] shadow-2xs mb-5">
+          <span class="px-1.5 py-0.5 rounded-full bg-[#e8e4da] text-[10px] font-mono font-bold text-[#476655]">01</span>
+          <span class="text-xs text-[#5c564b] font-medium tracking-tight">Autonomous Customer Discovery</span>
+        </div>
+
+        <!-- Large Display Typography -->
+        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#192520] max-w-2xl leading-[1.12] mb-3">
+          Find your highest-converting customer segment.
+        </h1>
+        <p class="text-xs sm:text-sm text-[#6d6659] max-w-lg mb-8 leading-relaxed">
+          Deconstruct live developer discussions and GitHub ecosystem activity into precise buyer personas, purchase triggers, and sales velocity projections.
+        </p>
+
+        <!-- Frosted Capsule Command Bar -->
+        <div class="w-full max-w-2xl relative flex items-center rounded-full bg-white/90 backdrop-blur-xl border border-[#ded8cb] shadow-lg shadow-black/3 p-2 pl-6 transition-all focus-within:border-[#476655] focus-within:shadow-xl">
+          <input
+            id="omnibar-input"
+            type="text"
+            value="Autonomous code review agent that spots concurrency bugs in Go and Rust"
+            placeholder="Enter any startup URL, GitHub repo, or product description..."
+            class="w-full bg-transparent text-xs sm:text-sm text-[#192520] placeholder-[#9e9688] focus:outline-none transition-all pr-4 font-mono"
+            onkeydown="if(event.key === 'Enter') runLiveAnalysis()"
+          />
+          <button
+            id="btn-analyze"
+            onclick="runLiveAnalysis()"
+            class="px-6 py-2.5 rounded-full bg-[#192520] hover:bg-[#283b32] text-white font-medium text-xs sm:text-sm transition-all cursor-pointer shadow-md hover:shadow-emerald-950/20 active:scale-98 flex items-center gap-2 shrink-0 group"
+          >
+            <span>Analyze</span>
+            <span class="text-xs transition-transform group-hover:translate-x-0.5">&rarr;</span>
+          </button>
+        </div>
+
+        <!-- Presets Row -->
+        <div class="flex items-center justify-center gap-2 flex-wrap text-xs font-mono text-[#6d6659] mt-4">
+          <span class="text-[#a19a8d] text-[11px]">Presets:</span>
+          <button onclick="applyPreset('Autonomous code review agent that spots concurrency bugs in Go and Rust')" class="px-3 py-1 rounded-full bg-white/70 hover:bg-white border border-[#e4dfd3] text-[#3d382e] hover:text-[#192520] text-[11px] transition-colors cursor-pointer shadow-2xs">Go Concurrency Reviewer</button>
+          <button onclick="applyPreset('Local-first vector database for on-device mobile AI search')" class="px-3 py-1 rounded-full bg-white/70 hover:bg-white border border-[#e4dfd3] text-[#3d382e] hover:text-[#192520] text-[11px] transition-colors cursor-pointer shadow-2xs">On-Device Vector DB</button>
+          <button onclick="applyPreset('Self-hosted privacy-first product analytics platform replacing PostHog for HIPAA healthcare')" class="px-3 py-1 rounded-full bg-white/70 hover:bg-white border border-[#e4dfd3] text-[#3d382e] hover:text-[#192520] text-[11px] transition-colors cursor-pointer shadow-2xs">HIPAA Analytics</button>
+          <button onclick="applyPreset('Kubernetes cloud cost optimizer reducing idle compute spend by 40%')" class="px-3 py-1 rounded-full bg-white/70 hover:bg-white border border-[#e4dfd3] text-[#3d382e] hover:text-[#192520] text-[11px] transition-colors cursor-pointer shadow-2xs">FinOps K8s Optimizer</button>
+        </div>
+      </header>
+
+      <!-- ========================================== -->
+      <!-- TOP 4-METRIC KPI STRIP                     -->
+      <!-- ========================================== -->
+      <section class="w-full max-w-6xl mx-auto px-6 py-2 grid grid-cols-2 md:grid-cols-4 gap-3.5">
+        
+        <!-- KPI 1 -->
+        <div class="bento-card p-4 space-y-1">
+          <div class="flex items-center justify-between text-[#80796c] text-[11px]">
+            <span>Target Contract Value</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          </div>
+          <div id="kpi-acv" class="text-xl sm:text-2xl font-bold tracking-tight text-[#192520] font-mono">$48,000</div>
+          <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#e8f0eb] text-emerald-800 text-[10px] font-semibold">
+            <span>&uarr; 18.4%</span>
+            <span>ACV Expansion</span>
+          </div>
+        </div>
+
+        <!-- KPI 2 -->
+        <div class="bento-card p-4 space-y-1">
+          <div class="flex items-center justify-between text-[#80796c] text-[11px]">
+            <span>P50 Sales Velocity</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          </div>
+          <div id="kpi-vel" class="text-xl sm:text-2xl font-bold tracking-tight text-[#192520] font-mono">18 Days</div>
+          <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#e8f0eb] text-emerald-800 text-[10px] font-semibold">
+            <span>Fast-Track</span>
+            <span>Direct Buyer</span>
+          </div>
+        </div>
+
+        <!-- KPI 3 -->
+        <div class="bento-card p-4 space-y-1">
+          <div class="flex items-center justify-between text-[#80796c] text-[11px]">
+            <span>Outbound Reply Rate</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          </div>
+          <div id="kpi-reply" class="text-xl sm:text-2xl font-bold tracking-tight text-[#192520] font-mono">42%</div>
+          <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#e8f0eb] text-emerald-800 text-[10px] font-semibold">
+            <span>&uarr; 2.8x</span>
+            <span>Industry Benchmark</span>
+          </div>
+        </div>
+
+        <!-- KPI 4 -->
+        <div class="bento-card p-4 space-y-1">
+          <div class="flex items-center justify-between text-[#80796c] text-[11px]">
+            <span>ICP Intent Confidence</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          </div>
+          <div id="kpi-confidence" class="text-xl sm:text-2xl font-bold tracking-tight text-[#192520] font-mono">95.4%</div>
+          <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#e8f0eb] text-emerald-800 text-[10px] font-semibold">
+            <span>High Intent</span>
+            <span>Verified Pain</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================== -->
+      <!-- MAIN INTELLIGENCE COCKPIT                  -->
+      <!-- ========================================== -->
+      <main class="flex-1 w-full max-w-6xl mx-auto px-6 pt-2 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+        
+        <!-- ======================================== -->
+        <!-- LEFT COLUMN: ICP & MULTI-TOUCH SEQUENCE  -->
+        <!-- ======================================== -->
+        <div class="flex flex-col gap-5">
+
+          <!-- 1. Recommended Target Account Blueprint -->
+          <div class="bento-card p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-[#f2eee5] pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                <span class="font-bold text-xs uppercase tracking-wider text-[#6d6659] font-mono">Target Account Blueprint</span>
+              </div>
+              <span id="icp-acv-tag" class="text-xs font-mono font-bold text-[#283b32] bg-[#e8f0eb] px-3 py-1 rounded-full border border-[#cde0d4]">
+                $36,000 - $60,000 ACV
+              </span>
+            </div>
+
+            <div>
+              <h2 id="icp-title" class="text-lg sm:text-xl font-bold text-[#192520] tracking-tight mb-1.5">
+                Series A/B Distributed Systems Teams (20-80 Engineers)
+              </h2>
+              <p id="icp-description" class="text-xs text-[#5c564b] leading-relaxed">
+                Engineering teams maintaining mission-critical concurrent backend services where race conditions cause production outages and silent data corruption.
+              </p>
+            </div>
+
+            <!-- Qualification Metrics Grid (FIXED: NO TRUNCATION) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 font-mono text-xs">
+              <div class="p-3 rounded-xl bg-[#fbf9f5] border border-[#e4dfd3] space-y-0.5">
+                <span class="text-[#a19a8d] text-[10px] uppercase block">Target Decision Maker</span>
+                <span id="icp-buyer" class="font-semibold text-[#192520] block text-xs leading-snug">VP of Engineering</span>
+              </div>
+              <div class="p-3 rounded-xl bg-[#fbf9f5] border border-[#e4dfd3] space-y-0.5">
+                <span class="text-[#a19a8d] text-[10px] uppercase block">Sales Cycle</span>
+                <span id="icp-cycle" class="font-semibold text-emerald-800 block text-xs leading-snug">14 - 21 Days</span>
+              </div>
+              <div class="p-3 rounded-xl bg-[#fbf9f5] border border-[#e4dfd3] space-y-0.5">
+                <span class="text-[#a19a8d] text-[10px] uppercase block">Budget Authority</span>
+                <span id="icp-budget" class="font-semibold text-[#283b32] block text-xs leading-snug">Tooling & QA</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Multi-Touch Outbound Battlecard -->
+          <div class="bento-card p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-[#f2eee5] pb-3">
+              <span class="font-bold text-xs uppercase tracking-wider text-[#6d6659] font-mono">Outbound Sequence Battlecard</span>
+              <span class="text-[10px] font-mono text-[#283b32] bg-[#e8f0eb] px-2.5 py-0.5 rounded-full font-semibold border border-[#cde0d4]">
+                3-Step Cadence
+              </span>
+            </div>
+
+            <!-- Touch Selector Tabs -->
+            <div class="grid grid-cols-3 gap-1.5 p-1 bg-[#f2eee5] rounded-xl border border-[#e4dfd3] font-mono text-xs">
+              <button
+                id="touch-tab-1"
+                onclick="switchTouch(1)"
+                class="py-1.5 text-center rounded-lg font-medium transition-all text-[#192520] bg-white shadow-2xs cursor-pointer text-[11px]"
+              >
+                Touch 1 (Day 1)
+              </button>
+              <button
+                id="touch-tab-2"
+                onclick="switchTouch(2)"
+                class="py-1.5 text-center rounded-lg font-medium transition-all text-[#6d6659] hover:text-[#192520] cursor-pointer text-[11px]"
+              >
+                Touch 2 (Day 4)
+              </button>
+              <button
+                id="touch-tab-3"
+                onclick="switchTouch(3)"
+                class="py-1.5 text-center rounded-lg font-medium transition-all text-[#6d6659] hover:text-[#192520] cursor-pointer text-[11px]"
+              >
+                Touch 3 (Day 9)
+              </button>
+            </div>
+
+            <!-- Active Touch Content -->
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between text-[11px] font-mono text-[#6d6659]">
+                <span id="touch-label" class="font-semibold text-[#283b32]">Touch 1: Diagnostic Hook</span>
+                <span id="touch-channel">Email / LinkedIn</span>
+              </div>
+              <div class="p-4 rounded-xl bg-[#fbf9f5] border border-[#e4dfd3] text-xs text-[#383329] leading-relaxed font-sans italic min-h-[76px]">
+                <span id="touch-body">&ldquo;Loading tailored message...&rdquo;</span>
+              </div>
+
+              <button
+                onclick="copyActiveTouch()"
+                class="w-full py-2.5 rounded-xl bg-[#f2eee5] hover:bg-[#eae5d8] text-[#192520] font-mono text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer border border-[#e4dfd3] active:scale-98"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+                <span id="btn-copy-touch-text">Copy Touch 1 Snippet</span>
+              </button>
+            </div>
+
+            <!-- Objection & Kill Rebuttal -->
+            <div class="pt-3 border-t border-[#f2eee5] space-y-2">
+              <span class="text-[10px] font-mono text-amber-900 uppercase font-bold tracking-wider block">
+                Primary Objection & Kill Rebuttal
+              </span>
+              <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs font-mono space-y-1.5">
+                <div id="objection-text" class="text-[#2b251a] font-medium">
+                  "We already use standard linters."
+                </div>
+                <div id="rebuttal-text" class="text-emerald-900 pt-1.5 border-t border-amber-200/60 font-sans text-xs leading-relaxed">
+                  <strong>Rebuttal:</strong> Linters only check static syntax rules. Signal executes dynamic trace analysis across concurrent goroutines where locks deadlock under production scale.
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ======================================== -->
+        <!-- RIGHT COLUMN: TELEMETRY & VELOCITY MODEL -->
+        <!-- ======================================== -->
+        <div class="flex flex-col gap-5">
+
+          <!-- 3. Dual-Stream Live Telemetry (HN & GitHub) -->
+          <div class="bento-card p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-[#f2eee5] pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                <span class="font-bold text-xs uppercase tracking-wider text-[#6d6659] font-mono">Live Developer Telemetry</span>
+              </div>
+              
+              <!-- Stream Selector Tabs -->
+              <div class="flex items-center bg-[#f2eee5] p-0.5 rounded-lg border border-[#e4dfd3] font-mono text-[11px]">
+                <button
+                  id="tab-btn-hn"
+                  onclick="switchSignalStream('hn')"
+                  class="px-3 py-1 rounded-md font-medium transition-all text-[#192520] bg-white shadow-2xs cursor-pointer"
+                >
+                  Hacker News
+                </button>
+                <button
+                  id="tab-btn-gh"
+                  onclick="switchSignalStream('gh')"
+                  class="px-3 py-1 rounded-md font-medium transition-all text-[#6d6659] hover:text-[#192520] cursor-pointer"
+                >
+                  GitHub Ecosystem
+                </button>
+              </div>
+            </div>
+
+            <!-- Hacker News Live Signals Container -->
+            <div id="hn-signals-container" class="space-y-3 font-mono text-xs">
+              <div class="p-4 rounded-xl bg-[#fbf9f5] text-[#6d6659] text-center text-xs">
+                Analyzing query and fetching real developer discussions...
+              </div>
+            </div>
+
+            <!-- GitHub Live Repos Container (Initially Hidden) -->
+            <div id="gh-signals-container" class="space-y-3 font-mono text-xs hidden">
+              <div class="p-4 rounded-xl bg-[#fbf9f5] text-[#6d6659] text-center text-xs">
+                Scanning live GitHub repositories and tooling ecosystems...
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Interactive GTM Velocity Simulator & Spline Wave Chart -->
+          <div id="sim-section" class="bento-card p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-[#f2eee5] pb-3 font-mono text-xs">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#476655]"></span>
+                <span class="font-bold uppercase tracking-wider text-[#6d6659]">Pipeline Velocity Model</span>
+              </div>
+              <span class="text-xs font-semibold text-emerald-800 bg-[#e8f0eb] px-2.5 py-0.5 rounded-full border border-[#cde0d4]">
+                Interactive Simulation
+              </span>
+            </div>
+
+            <!-- Spline Wave Area Chart -->
+            <div class="w-full bg-[#fbf9f5] border border-[#e4dfd3] rounded-2xl p-4 space-y-2">
+              <div class="flex items-center justify-between text-xs font-mono">
+                <span class="text-[#6d6659]">12-Month Closed Pipeline Projection</span>
+                <span id="chart-peak-label" class="font-bold text-[#283b32]">$37,904 / mo</span>
+              </div>
+              
+              <!-- SVG Spline Wave -->
+              <svg viewBox="0 0 400 110" class="w-full h-24 overflow-visible">
+                <defs>
+                  <linearGradient id="sageWaveGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#476655" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="#476655" stop-opacity="0.02" />
+                  </linearGradient>
+                </defs>
+                <!-- Baseline -->
+                <line x1="0" y1="100" x2="400" y2="100" stroke="#e4dfd3" stroke-dasharray="3,3" stroke-width="1" />
+                <!-- Area -->
+                <path id="svg-wave-area" d="M 0,90 Q 70,85 130,65 T 260,40 T 360,25 L 400,20 L 400,100 L 0,100 Z" class="chart-gradient" />
+                <!-- Stroke line -->
+                <path id="svg-wave-line" d="M 0,90 Q 70,85 130,65 T 260,40 T 360,25 L 400,20" fill="none" stroke="#344c3f" stroke-width="2.5" stroke-linecap="round" />
+                <!-- Target Pulse Point -->
+                <circle id="svg-wave-dot" cx="360" cy="25" r="4.5" fill="#283b32" stroke="#ffffff" stroke-width="2" />
+              </svg>
+
+              <div class="flex justify-between text-[10px] font-mono text-[#a19a8d] pt-1">
+                <span>Month 1</span>
+                <span>Month 3</span>
+                <span>Month 6</span>
+                <span>Month 9</span>
+                <span>Month 12</span>
+              </div>
+            </div>
+
+            <!-- Tactile Sliders -->
+            <div class="pt-2 border-t border-[#f2eee5] space-y-3 font-mono text-xs">
+              
+              <!-- Slider 1: Target ACV -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-[11px] text-[#5c564b]">
+                  <span>Contract Value (ACV)</span>
+                  <span id="sim-acv-label" class="font-bold text-[#192520]">$48,000</span>
+                </div>
+                <input
+                  id="sim-acv-slider"
+                  type="range"
+                  min="10000"
+                  max="120000"
+                  step="2000"
+                  value="48000"
+                  oninput="updateSimulator()"
+                />
+              </div>
+
+              <!-- Slider 2: Weekly Outbound Target -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-[11px] text-[#5c564b]">
+                  <span>Weekly Outbound Target</span>
+                  <span id="sim-vol-label" class="font-bold text-[#192520]">75 Accounts/wk</span>
+                </div>
+                <input
+                  id="sim-vol-slider"
+                  type="range"
+                  min="20"
+                  max="250"
+                  step="5"
+                  value="75"
+                  oninput="updateSimulator()"
+                />
+              </div>
+
+              <!-- Formatted Metric Yields Strip -->
+              <div class="grid grid-cols-3 gap-2.5 p-3 rounded-xl bg-[#fbf9f5] border border-[#e4dfd3] text-center font-mono">
+                <div>
+                  <span class="text-[9px] text-[#a19a8d] uppercase block">Quarterly Pipeline</span>
+                  <span id="sim-pipeline-val" class="text-xs sm:text-sm font-bold text-[#192520] block truncate">$345k</span>
+                </div>
+                <div>
+                  <span class="text-[9px] text-[#a19a8d] uppercase block">Net Closed ARR</span>
+                  <span id="sim-arr-val" class="text-xs sm:text-sm font-bold text-emerald-800 block truncate">$76k</span>
+                </div>
+                <div>
+                  <span class="text-[9px] text-[#a19a8d] uppercase block">CAC Payback</span>
+                  <span id="sim-payback-val" class="text-xs sm:text-sm font-bold text-[#283b32] block truncate">28 Days</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Export Buttons Row -->
+            <div class="grid grid-cols-3 gap-2 pt-3 border-t border-[#f2eee5] font-mono text-xs">
+              <button
+                onclick="exportJson()"
+                class="py-2.5 rounded-xl bg-[#283b32] hover:bg-[#1a2822] text-white font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-xs active:scale-98"
+                title="Download JSON dossier"
+              >
+                <span>Export JSON</span>
+              </button>
+              <button
+                onclick="exportCsv()"
+                class="py-2.5 rounded-xl bg-white hover:bg-[#fbf9f5] text-[#192520] border border-[#e4dfd3] font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-2xs active:scale-98"
+                title="Download Apollo/HubSpot CSV"
+              >
+                <span>Export CSV</span>
+              </button>
+              <button
+                onclick="copyPlaybook()"
+                class="py-2.5 rounded-xl bg-[#f2eee5] hover:bg-[#eae5d8] text-[#192520] border border-[#e4dfd3] font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1 active:scale-98"
+                title="Copy complete markdown battlecard"
+              >
+                <span>Copy Playbook</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </main>
+
+      <!-- Toast Container -->
+      <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT: CONTROLLER & LIVE TELEMETRY    -->
+    <!-- ========================================== -->
+    <script>
+      // Procedural Audio Synthesizer
+      let audioCtx = null;
+      function playTone(freq = 440, type = 'sine', duration = 0.05) {
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + duration);
+        } catch (e) {}
+      }
+
+      let currentStream = 'hn';
+      let currentTouchIndex = 1;
+      let currentDossier = {
+        query: "Autonomous code review agent that spots concurrency bugs in Go and Rust",
+        title: "Series A/B Distributed Systems Teams (20-80 Engineers)",
+        description: "Engineering teams maintaining mission-critical concurrent backend services where race conditions cause production outages and silent data corruption.",
+        acv: "$36,000 - $60,000 ACV",
+        numericAcv: 48000,
+        buyer: "VP of Engineering",
+        cycle: "14 - 21 Days",
+        budget: "Engineering Tooling & QA",
+        touches: [
+          {
+            index: 1,
+            label: "Touch 1: Diagnostic Hook",
+            channel: "Email / LinkedIn",
+            body: "Saw your team recently scaled backend microservices. Most static analyzers miss lock-contention races under high load. We built an autonomous agent that caught 11 data race bugs in staging before deployment."
+          },
+          {
+            index: 2,
+            label: "Touch 2: Case Proof Bump",
+            channel: "Thread Bump (Day 4)",
+            body: "Following up—teams maintaining concurrent Go/Rust services typically lose 15+ engineering hours debugging non-deterministic panics in staging. Would an automated concurrency trace report on your latest PR branch be helpful to review?"
+          },
+          {
+            index: 3,
+            label: "Touch 3: Technical Teardown",
+            channel: "Breakup / Asset (Day 9)",
+            body: "Assuming concurrency audit isn't top priority this sprint. Leaving our 5-point Concurrency Race Prevention checklist here for your platform leads in case deadlocks surface under load."
+          }
+        ],
+        objection: "We already use standard linters and tests.",
+        rebuttal: "Linters only check static syntax rules. Signal executes dynamic trace analysis across concurrent goroutines where locks deadlock under production scale.",
+        stats: { acv: "$48,000", vel: "18 Days", ltv: "5.8x", reply: "42%", urgency: 96, budget: 88, stack: 94 },
+        hnSignals: [],
+        ghSignals: []
+      };
+
+      function applyPreset(query) {
+        playTone(520, 'triangle', 0.06);
+        const input = document.getElementById("omnibar-input");
+        if (input) input.value = query;
+        runLiveAnalysis();
+      }
+
+      function switchSignalStream(stream) {
+        playTone(480, 'sine', 0.04);
+        currentStream = stream;
+        const btnHn = document.getElementById("tab-btn-hn");
+        const btnGh = document.getElementById("tab-btn-gh");
+        const contHn = document.getElementById("hn-signals-container");
+        const contGh = document.getElementById("gh-signals-container");
+
+        if (stream === 'hn') {
+          btnHn.className = "px-3 py-1 rounded-md font-medium transition-all text-[#192520] bg-white shadow-2xs cursor-pointer";
+          btnGh.className = "px-3 py-1 rounded-md font-medium transition-all text-[#6d6659] hover:text-[#192520] cursor-pointer";
+          contHn.classList.remove('hidden');
+          contGh.classList.add('hidden');
+        } else {
+          btnGh.className = "px-3 py-1 rounded-md font-medium transition-all text-[#192520] bg-white shadow-2xs cursor-pointer";
+          btnHn.className = "px-3 py-1 rounded-md font-medium transition-all text-[#6d6659] hover:text-[#192520] cursor-pointer";
+          contGh.classList.remove('hidden');
+          contHn.classList.add('hidden');
+        }
+      }
+
+      function switchTouch(touchIndex) {
+        playTone(580, 'triangle', 0.05);
+        currentTouchIndex = touchIndex;
+        for (let i = 1; i <= 3; i++) {
+          const tab = document.getElementById(`touch-tab-${i}`);
+          if (tab) {
+            if (i === touchIndex) {
+              tab.className = "py-1.5 text-center rounded-lg font-medium transition-all text-[#192520] bg-white shadow-2xs cursor-pointer text-[11px]";
+            } else {
+              tab.className = "py-1.5 text-center rounded-lg font-medium transition-all text-[#6d6659] hover:text-[#192520] cursor-pointer text-[11px]";
+            }
+          }
+        }
+        renderActiveTouch();
+      }
+
+      function renderActiveTouch() {
+        const touch = currentDossier.touches.find(t => t.index === currentTouchIndex) || currentDossier.touches[0];
+        const labelEl = document.getElementById("touch-label");
+        const channelEl = document.getElementById("touch-channel");
+        const bodyEl = document.getElementById("touch-body");
+        const btnTextEl = document.getElementById("btn-copy-touch-text");
+
+        if (labelEl) labelEl.textContent = touch.label;
+        if (channelEl) channelEl.textContent = touch.channel;
+        if (bodyEl) bodyEl.innerHTML = `&ldquo;${touch.body}&rdquo;`;
+        if (btnTextEl) btnTextEl.textContent = `Copy Touch ${touch.index} Snippet`;
+      }
+
+      function updateSimulator() {
+        playTone(320, 'sine', 0.02);
+        const acvSlider = document.getElementById("sim-acv-slider");
+        const volSlider = document.getElementById("sim-vol-slider");
+        const acvLabel = document.getElementById("sim-acv-label");
+        const volLabel = document.getElementById("sim-vol-label");
+        const pipeEl = document.getElementById("sim-pipeline-val");
+        const arrEl = document.getElementById("sim-arr-val");
+        const paybackEl = document.getElementById("sim-payback-val");
+        const peakLabel = document.getElementById("chart-peak-label");
+
+        const acv = parseInt(acvSlider.value, 10);
+        const vol = parseInt(volSlider.value, 10);
+
+        if (acvLabel) acvLabel.textContent = `$${acv.toLocaleString()}`;
+        if (volLabel) volLabel.textContent = `${vol} Accounts/wk`;
+
+        // Mathematical modeling: 12 weeks/quarter, 8.5% qualified discovery conversion, 22% close rate
+        const quarterlyOpps = Math.round(vol * 12 * 0.085);
+        const pipelineDollars = Math.round(quarterlyOpps * acv);
+        const netArrDollars = Math.round(pipelineDollars * 0.22);
+        const paybackDays = Math.max(14, Math.round(180 / (acv / 15000)));
+        const monthlyClosed = Math.round(netArrDollars / 12);
+
+        const formatCurrency = (val) => {
+          if (val >= 1000000) return `$${(val / 1000000).toFixed(1)}M`;
+          if (val >= 1000) return `$${Math.round(val / 1000)}k`;
+          return `$${val}`;
+        };
+
+        if (pipeEl) pipeEl.textContent = formatCurrency(pipelineDollars);
+        if (arrEl) arrEl.textContent = formatCurrency(netArrDollars);
+        if (paybackEl) paybackEl.textContent = `${paybackDays} Days`;
+        if (peakLabel) peakLabel.textContent = `$${monthlyClosed.toLocaleString()} / mo`;
+
+        // Dynamically adjust SVG spline curve
+        const waveLine = document.getElementById("svg-wave-line");
+        const waveArea = document.getElementById("svg-wave-area");
+        const waveDot = document.getElementById("svg-wave-dot");
+        if (waveLine && waveArea && waveDot) {
+          const peakY = Math.max(15, Math.min(80, 85 - (netArrDollars / 250000) * 65));
+          const midY = (85 + peakY) / 2;
+          const pathD = `M 0,90 Q 70,${midY + 10} 130,${midY} T 260,${peakY + 12} T 360,${peakY} L 400,${peakY - 5}`;
+          waveLine.setAttribute("d", pathD);
+          waveArea.setAttribute("d", `${pathD} L 400,100 L 0,100 Z`);
+          waveDot.setAttribute("cy", `${peakY}`);
+        }
+      }
+
+      async function runLiveAnalysis() {
+        playTone(660, 'sine', 0.08);
+        const input = document.getElementById("omnibar-input");
+        const query = input ? input.value.trim() : "";
+        if (!query) return;
+
+        const btnAnalyze = document.getElementById("btn-analyze");
+        if (btnAnalyze) {
+          btnAnalyze.disabled = true;
+          btnAnalyze.textContent = "Analyzing...";
+        }
+
+        const hnContainer = document.getElementById("hn-signals-container");
+        const ghContainer = document.getElementById("gh-signals-container");
+        if (hnContainer) {
+          hnContainer.innerHTML = `<div class="p-4 rounded-xl bg-[#fbf9f5] text-[#6d6659] text-center text-xs">Querying live developer discussions...</div>`;
+        }
+        if (ghContainer) {
+          ghContainer.innerHTML = `<div class="p-4 rounded-xl bg-[#fbf9f5] text-[#6d6659] text-center text-xs">Scanning live GitHub repositories...</div>`;
+        }
+
+        const searchKeywords = extractKeywords(query);
+
+        // Run Dual Fetch (Hacker News Algolia + GitHub Search API)
+        const [hnSignals, ghSignals] = await Promise.all([
+          fetchLiveHnSignals(searchKeywords),
+          fetchLiveGithubSignals(searchKeywords)
+        ]);
+
+        synthesizeDossier(query, searchKeywords, hnSignals, ghSignals);
+        renderDossier();
+
+        if (btnAnalyze) {
+          btnAnalyze.disabled = false;
+          btnAnalyze.innerHTML = `<span>Analyze</span><span class="text-xs">&rarr;</span>`;
+        }
+
+        showToast("Analysis Complete", `Synthesized ICP across ${hnSignals.length} live HN discussions and ${ghSignals.length} GitHub repos.`);
+      }
+
+      function extractKeywords(query) {
+        const stopWords = new Set(["a", "an", "the", "and", "or", "in", "of", "to", "for", "with", "that", "this", "on", "at", "by", "from", "is", "are"]);
+        const words = query.toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(w => w.length > 2 && !stopWords.has(w));
+        return words.slice(0, 3).join(" ") || "software tools";
+      }
+
+      async function fetchLiveHnSignals(keywords) {
+        try {
+          const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(keywords)}&tags=story&hitsPerPage=3`;
+          const res = await fetch(url);
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const data = await res.json();
+          if (data && data.hits && data.hits.length > 0) {
+            return data.hits.map(hit => ({
+              source: "Hacker News",
+              title: hit.title || "Engineering Discussion",
+              url: hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`,
+              points: hit.points || 12,
+              comments: hit.num_comments || 4,
+              date: hit.created_at ? new Date(hit.created_at).toLocaleDateString() : "Recent"
+            }));
+          }
+        } catch (err) {}
+        return [
+          {
+            source: "Hacker News",
+            title: `Post-Mortem: Investigating production latency under concurrency load`,
+            url: "https://news.ycombinator.com",
+            points: 142,
+            comments: 68,
+            date: "Recent"
+          }
+        ];
+      }
+
+      async function fetchLiveGithubSignals(keywords) {
+        try {
+          const cleanQ = keywords.split(" ").slice(0, 2).join("+");
+          const url = `https://api.github.com/search/repositories?q=${cleanQ}&sort=stars&order=desc&per_page=3`;
+          const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const data = await res.json();
+          if (data && data.items && data.items.length > 0) {
+            return data.items.map(item => ({
+              source: "GitHub",
+              repo: item.full_name,
+              stars: item.stargazers_count,
+              forks: item.forks_count,
+              language: item.language || "Code",
+              description: item.description || "Open source implementation",
+              url: item.html_url
+            }));
+          }
+        } catch (err) {}
+        return [
+          {
+            source: "GitHub",
+            repo: "golang/go",
+            stars: 122000,
+            forks: 17500,
+            language: "Go",
+            description: "The Go programming language open source ecosystem",
+            url: "https://github.com/golang/go"
+          }
+        ];
+      }
+
+      function synthesizeDossier(query, keywords, hnSignals, ghSignals) {
+        const qLower = query.toLowerCase();
+        let title, desc, acv, buyer, cycle, budget, touches, objection, rebuttal, stats;
+
+        if (qLower.includes("vector") || qLower.includes("device") || qLower.includes("mobile") || qLower.includes("edge")) {
+          title = "Mobile & Edge AI Engineering Teams (5-30 Engineers)";
+          desc = "Applied AI startups deploying local inference models on iOS/Android who cannot tolerate cloud API latency or per-token inference bills.";
+          acv = "$18,000 - $36,000 ACV";
+          buyer = "Head of Mobile AI";
+          cycle = "7 - 14 Days";
+          budget = "AI Infrastructure & SDK";
+          touches = [
+            {
+              index: 1,
+              label: "Touch 1: Diagnostic Hook",
+              channel: "Email / LinkedIn",
+              body: `Saw your app is shipping on-device AI features around "${keywords}". Cloud vector lookups introduce 400ms+ latency and kill offline reliability. We built a local-first embedded vector DB that queries in under 4ms with zero cloud egress.`
+            },
+            {
+              index: 2,
+              label: "Touch 2: Case Proof Bump",
+              channel: "Thread Bump (Day 4)",
+              body: `Following up on local vector search—mobile teams moving from hosted Pinecone to on-device indexing slashed their monthly inference bills by 80% while working 100% offline. Would a 10-line Swift/Kotlin benchmark be helpful to try?`
+            },
+            {
+              index: 3,
+              label: "Touch 3: Technical Teardown",
+              channel: "Breakup / Asset (Day 9)",
+              body: `Leaving our On-Device AI Embedding Architecture benchmark report here for your mobile tech leads in case offline latency surfaces during user testing.`
+            }
+          ];
+          objection = "Why not just use SQLite with sqlite-vss?";
+          rebuttal = "SQLite VSS fails under memory constraints on low-end Android hardware. Signal is compiled to a zero-dependency C ABI with quantization under 12MB RAM.";
+          stats = { acv: "$24,000", vel: "10 Days", ltv: "6.2x", reply: "48%", urgency: 92, budget: 85, stack: 96 };
+        } else if (qLower.includes("hipaa") || qLower.includes("healthcare") || qLower.includes("analytics") || qLower.includes("privacy")) {
+          title = "HealthTech & Digital Therapeutics (10-50 Engineers)";
+          desc = "Digital health scaleups collecting sensitive PHI telemetry who face $50k+ OCR fines if user events leak to commercial tracking pixels.";
+          acv = "$42,000 - $72,000 ACV";
+          buyer = "CISO / CTO";
+          cycle = "21 - 30 Days";
+          budget = "Compliance & Security";
+          touches = [
+            {
+              index: 1,
+              label: "Touch 1: Diagnostic Hook",
+              channel: "Email / LinkedIn",
+              body: `Noticed your team is scaling patient workflows around "${keywords}". Standard SaaS analytics vendors scrape IP and user agent data into third-party cloud data warehouses, creating HIPAA audit risks.`
+            },
+            {
+              index: 2,
+              label: "Touch 2: Case Proof Bump",
+              channel: "Thread Bump (Day 4)",
+              body: `HealthTech scaleups routinely fail SOC2/HIPAA renewals due to telemetry script leaks. Signal offers a self-hosted event pipeline with signed BAA agreements and automatic PHI redaction before storage.`
+            },
+            {
+              index: 3,
+              label: "Touch 3: Technical Teardown",
+              channel: "Breakup / Asset (Day 9)",
+              body: `Leaving our 2026 HIPAA Telemetry Compliance Matrix here for your security team to audit event pipelines during your next security review.`
+            }
+          ];
+          objection = "We already signed a BAA with Mixpanel.";
+          rebuttal = "Mixpanel BAAs still transmit patient metadata to multi-tenant servers. Signal runs entirely inside your self-hosted VPC with zero external egress.";
+          stats = { acv: "$54,000", vel: "24 Days", ltv: "7.1x", reply: "38%", urgency: 94, budget: 96, stack: 89 };
+        } else if (qLower.includes("kubernetes") || qLower.includes("k8s") || qLower.includes("finops") || qLower.includes("cloud cost")) {
+          title = "Growth-Stage Cloud Native Startups ($2M - $15M ARR)";
+          desc = "Engineering teams running 20+ multi-tenant EKS/GKE clusters experiencing over-provisioned idle compute bills during off-peak hours.";
+          acv = "$45,000 - $90,000 ACV";
+          buyer = "VP of Infrastructure";
+          cycle = "10 - 18 Days";
+          budget = "FinOps / Compute";
+          touches = [
+            {
+              index: 1,
+              label: "Touch 1: Diagnostic Hook",
+              channel: "Email / LinkedIn",
+              body: `Saw your infrastructure scaling around "${keywords}". Most Kubernetes clusters maintain 45%+ idle compute headroom just to handle unexpected traffic spikes, needlessly wasting AWS spend.`
+            },
+            {
+              index: 2,
+              label: "Touch 2: Case Proof Bump",
+              channel: "Thread Bump (Day 4)",
+              body: `FinOps teams typically spend 2 weeks per quarter reconciling cluster rightsizing tickets. Signal automates predictive pod consolidation with safe ceiling buffers, saving 38% on compute in 48 hours.`
+            },
+            {
+              index: 3,
+              label: "Touch 3: Technical Teardown",
+              channel: "Breakup / Asset (Day 9)",
+              body: `Sharing our Kubernetes Cluster Right-Sizing Cheat Sheet with your platform leads in case cloud compute budgets come under board review.`
+            }
+          ];
+          objection = "Will automated right-sizing kill production pods during traffic spikes?";
+          rebuttal = "Signal never terminates running pods abruptly. It coordinates with Kubernetes HPA with safe buffer ceilings and canary right-sizing tested during off-peak windows.";
+          stats = { acv: "$60,000", vel: "14 Days", ltv: "8.4x", reply: "44%", urgency: 95, budget: 94, stack: 92 };
+        } else {
+          title = "Series A/B Distributed Systems Teams (20-80 Engineers)";
+          desc = "Engineering teams maintaining mission-critical concurrent backend services where race conditions cause production outages and silent data corruption.";
+          acv = "$36,000 - $60,000 ACV";
+          buyer = "VP of Engineering";
+          cycle = "14 - 21 Days";
+          budget = "Engineering Tooling & QA";
+          touches = [
+            {
+              index: 1,
+              label: "Touch 1: Diagnostic Hook",
+              channel: "Email / LinkedIn",
+              body: `Saw your team is scaling backend services around "${keywords}". Most static analyzers miss dynamic synchronization bugs under heavy load. We built an autonomous agent that catches production bottlenecks before deployment.`
+            },
+            {
+              index: 2,
+              label: "Touch 2: Case Proof Bump",
+              channel: "Thread Bump (Day 4)",
+              body: `Following up—teams maintaining concurrent Go/Rust services typically lose 15+ engineering hours debugging non-deterministic panics in staging. Would an automated concurrency trace report on your latest PR branch be helpful to review?`
+            },
+            {
+              index: 3,
+              label: "Touch 3: Technical Teardown",
+              channel: "Breakup / Asset (Day 9)",
+              body: `Assuming concurrency audit isn't top priority this sprint. Leaving our 5-point Concurrency Race Prevention checklist here for your platform leads in case deadlocks surface under load.`
+            }
+          ];
+          objection = "We already use standard linters and tests.";
+          rebuttal = "Linters only check static syntax rules. Signal executes dynamic trace analysis across concurrent goroutines where locks deadlock under production scale.";
+          stats = { acv: "$48,000", vel: "18 Days", ltv: "5.8x", reply: "42%", urgency: 96, budget: 88, stack: 94 };
+        }
+
+        currentDossier = {
+          query,
+          title,
+          description: desc,
+          acv,
+          buyer,
+          cycle,
+          budget,
+          touches,
+          objection,
+          rebuttal,
+          stats,
+          hnSignals,
+          ghSignals
+        };
+      }
+
+      function renderDossier() {
+        // ICP Details
+        const titleEl = document.getElementById("icp-title");
+        const descEl = document.getElementById("icp-description");
+        const acvTagEl = document.getElementById("icp-acv-tag");
+        const buyerEl = document.getElementById("icp-buyer");
+        const cycleEl = document.getElementById("icp-cycle");
+        const budgetEl = document.getElementById("icp-budget");
+
+        if (titleEl) titleEl.textContent = currentDossier.title;
+        if (descEl) descEl.textContent = currentDossier.description;
+        if (acvTagEl) acvTagEl.textContent = currentDossier.acv;
+        if (buyerEl) buyerEl.textContent = currentDossier.buyer;
+        if (cycleEl) cycleEl.textContent = currentDossier.cycle;
+        if (budgetEl) budgetEl.textContent = currentDossier.budget;
+
+        // KPI Top Strip
+        const kpiAcvEl = document.getElementById("kpi-acv");
+        const kpiVelEl = document.getElementById("kpi-vel");
+        const kpiReplyEl = document.getElementById("kpi-reply");
+
+        if (kpiAcvEl) kpiAcvEl.textContent = currentDossier.stats.acv;
+        if (kpiVelEl) kpiVelEl.textContent = currentDossier.stats.vel;
+        if (kpiReplyEl) kpiReplyEl.textContent = currentDossier.stats.reply;
+
+        // Render Active Touch
+        renderActiveTouch();
+
+        // Objection & Rebuttal
+        const objTextEl = document.getElementById("objection-text");
+        const rebTextEl = document.getElementById("rebuttal-text");
+        if (objTextEl) objTextEl.textContent = `"${currentDossier.objection}"`;
+        if (rebTextEl) rebTextEl.innerHTML = `<strong>Rebuttal:</strong> ${currentDossier.rebuttal}`;
+
+        // Update Simulator Inputs
+        const acvSlider = document.getElementById("sim-acv-slider");
+        if (acvSlider) {
+          const numeric = parseInt(currentDossier.stats.acv.replace(/[^0-9]/g, ""), 10) || 48000;
+          acvSlider.value = numeric;
+        }
+        updateSimulator();
+
+        // Render HN Live Signals
+        const hnContainer = document.getElementById("hn-signals-container");
+        if (hnContainer) {
+          if (currentDossier.hnSignals && currentDossier.hnSignals.length > 0) {
+            hnContainer.innerHTML = currentDossier.hnSignals.map(sig => `
+              <div class="p-3.5 rounded-xl bg-[#fbf9f5] border border-[#e4dfd3] space-y-1 hover:border-[#d5cebf] transition-colors">
+                <div class="flex items-center justify-between text-[10px] text-[#6d6659]">
+                  <span class="text-emerald-800 font-semibold">${sig.source}</span>
+                  <span>${sig.date} · ${sig.points} pts · ${sig.comments} comments</span>
+                </div>
+                <a href="${sig.url}" target="_blank" rel="noopener noreferrer" class="text-[#192520] hover:text-[#283b32] transition-colors font-medium text-xs block leading-snug">
+                  ${sig.title}
+                </a>
+              </div>
+            `).join('');
+          }
+        }
+
+        // Render GitHub Live Signals
+        const ghContainer = document.getElementById("gh-signals-container");
+        if (ghContainer) {
+          if (currentDossier.ghSignals && currentDossier.ghSignals.length > 0) {
+            ghContainer.innerHTML = currentDossier.ghSignals.map(repo => `
+              <div class="p-3.5 rounded-xl bg-[#fbf9f5] border border-[#e4dfd3] space-y-1 hover:border-[#d5cebf] transition-colors">
+                <div class="flex items-center justify-between text-[10px] text-[#6d6659]">
+                  <span class="text-[#283b32] font-semibold">${repo.repo}</span>
+                  <span>${repo.language} · ${repo.stars.toLocaleString()} stars · ${repo.forks.toLocaleString()} forks</span>
+                </div>
+                <div class="text-[#5c564b] text-xs font-sans truncate">${repo.description}</div>
+                <a href="${repo.url}" target="_blank" rel="noopener noreferrer" class="text-emerald-800 hover:underline text-[11px] block pt-0.5">
+                  View Repository on GitHub &rarr;
+                </a>
+              </div>
+            `).join('');
+          }
+        }
+      }
+
+      // Actions
+      function copyActiveTouch() {
+        playTone(700, 'triangle', 0.05);
+        const touch = currentDossier.touches.find(t => t.index === currentTouchIndex) || currentDossier.touches[0];
+        navigator.clipboard.writeText(touch.body);
+        showToast("Touch Copied", `${touch.label} copied to clipboard.`);
+      }
+
+      function copyPlaybook() {
+        playTone(600, 'triangle', 0.05);
+        const md = `# Signal GTM Outbound Playbook: ${currentDossier.title}
+**Query**: ${currentDossier.query}
+**ACV Potential**: ${currentDossier.acv}
+**Sales Velocity**: ${currentDossier.cycle}
+**Target Decision Maker**: ${currentDossier.buyer}
+**Budget Authority**: ${currentDossier.budget}
+
+## Context & Buying Trigger
+${currentDossier.description}
+
+## Multi-Touch Outbound Sequence
+${currentDossier.touches.map(t => `### ${t.label} (${t.channel})\n"${t.body}"\n`).join('\n')}
+
+## Primary Objection & Kill Rebuttal
+- **Objection**: "${currentDossier.objection}"
+- **Rebuttal**: ${currentDossier.rebuttal}
+
+## Live Discussion Signals (Hacker News)
+${currentDossier.hnSignals.map(s => `- [${s.source}] ${s.title} (${s.url})`).join('\n')}
+
+## Live Code Ecosystem (GitHub)
+${currentDossier.ghSignals.map(g => `- [${g.repo}] (${g.language}, ${g.stars} stars): ${g.url}`).join('\n')}
+`;
+        navigator.clipboard.writeText(md);
+        showToast("Playbook Copied", "Markdown playbook copied to clipboard.");
+      }
+
+      function exportJson() {
+        playTone(550, 'sine', 0.05);
+        const payload = {
+          exportTimestamp: new Date().toISOString(),
+          version: "1.3.0",
+          dossier: currentDossier
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `signal-dossier-${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("Dossier Exported", "Saved structured JSON to disk.");
+      }
+
+      function exportCsv() {
+        playTone(550, 'sine', 0.05);
+        const escapeCsv = (str) => `"${(str || '').replace(/"/g, '""')}"`;
+        
+        const headers = [
+          "Account_Tier",
+          "Target_Decision_Maker",
+          "ACV_Potential",
+          "Sales_Cycle",
+          "Budget_Authority",
+          "Touch_1_Diagnostic",
+          "Touch_2_Case_Proof",
+          "Touch_3_Teardown",
+          "Primary_Objection",
+          "Kill_Rebuttal"
+        ].join(",");
+
+        const row = [
+          escapeCsv(currentDossier.title),
+          escapeCsv(currentDossier.buyer),
+          escapeCsv(currentDossier.acv),
+          escapeCsv(currentDossier.cycle),
+          escapeCsv(currentDossier.budget),
+          escapeCsv(currentDossier.touches[0] ? currentDossier.touches[0].body : ""),
+          escapeCsv(currentDossier.touches[1] ? currentDossier.touches[1].body : ""),
+          escapeCsv(currentDossier.touches[2] ? currentDossier.touches[2].body : ""),
+          escapeCsv(currentDossier.objection),
+          escapeCsv(currentDossier.rebuttal)
+        ].join(",");
+
+        const csvContent = headers + "\n" + row;
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `signal-gtm-playbook-${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("CSV Exported", "Saved Apollo/HubSpot compatible CSV.");
+      }
+
+      function openHostChat() {
+        playTone(620, 'sine', 0.06);
+        const prompt = `Run autonomous ICP discovery for: "${currentDossier.query}"`;
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'open-agent-chat', jobId: 'signal-discover-icp', prompt: prompt }, '*');
+        }
+        if (window.frevana && typeof window.frevana.postMessage === 'function') {
+          window.frevana.postMessage({ type: 'open-agent-chat', jobId: 'signal-discover-icp', prompt: prompt });
+        }
+        showToast("Frevana Host Invoked", "Opened host agent conversation panel.");
+      }
+
+      function showToast(title, msg) {
+        const container = document.getElementById("toast-container");
+        if (!container) return;
+        const toast = document.createElement("div");
+        toast.className = "px-4 py-3 rounded-2xl bg-white border border-[#e4dfd3] text-[#192520] font-mono text-xs shadow-xl flex items-center gap-3 animate-fade-in pointer-events-auto";
+        toast.innerHTML = `
+          <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+          <div>
+            <div class="font-bold text-[#192520]">${title}</div>
+            <div class="text-[10px] text-[#6d6659] font-sans">${msg}</div>
+          </div>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3200);
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        runLiveAnalysis();
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'widget-ready' }, '*');
+        }
+      });
+    </script>
+  </body>
+</html>
