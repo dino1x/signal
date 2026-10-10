@@ -85,6 +85,30 @@
         fill: url(#sageWaveGrad);
       }
 
+      /* Official Frevana Plug Badge (From ai-slop-checker) */
+      .plug {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 50;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        height: 38px;
+        padding: 0 15px 0 11px;
+        border-radius: 999px;
+        background: #fff;
+        box-shadow: 0 0 0 1px rgba(21, 20, 15, .08), 0 2px 6px rgba(21, 20, 15, .07);
+        color: #64635e;
+        font-size: 14.25px;
+        text-decoration: none;
+        transition: transform .35s ease, box-shadow .2s, color .2s;
+      }
+      .plug img { width: 17.5px; height: 17.5px; }
+      .plug b { font-weight: 500; color: #15140f; }
+      .plug:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(21, 20, 15, .1), 0 6px 16px rgba(21, 20, 15, .1); color: #15140f; }
+      .plug:active { transform: scale(.97); }
+
       /* Scrollbars */
       ::-webkit-scrollbar { width: 5px; height: 5px; }
       ::-webkit-scrollbar-track { background: transparent; }
@@ -553,6 +577,9 @@ FREVANA_APP_DIRECTIVE:END -->
 
       <!-- Toast Container -->
       <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+      <!-- Exact Frevana Plug from ai-slop-checker.vercel.app -->
+      <a class="plug" href="https://www.frevana.com/vibe-coding" target="_blank" rel="noopener">Made with <img src="frevana.png" alt="" width="18" height="18"><b>Frevana</b></a>
 
     </div>
 
